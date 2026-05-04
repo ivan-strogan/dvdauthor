@@ -1721,6 +1721,30 @@ int pgc_add_button(struct pgc *p,const char *name,const char *cmd)
     return 0;
   } /*pgc_add_button*/
 
+void pgc_set_button_geom(struct pgc *p,
+    int x0, int y0, int x1, int y1,
+    const char *up, const char *down, const char *left, const char *right)
+  /* Set geometry and navigation on the most recently added button (stream 0). */
+  {
+    struct button *b;
+    struct buttoninfo *bi;
+    if (p->numbuttons == 0)
+        return;
+    b = &p->buttons[p->numbuttons - 1];
+    b->numstream = 1;
+    bi = &b->stream[0];
+    bi->substreamid = 0;
+    /* XML x0/y0/x1/y1 map to internal x1/y1/x2/y2 */
+    bi->x1 = x0;
+    bi->y1 = y0;
+    bi->x2 = x1;
+    bi->y2 = y1;
+    if (up)    bi->up    = strdup(up);
+    if (down)  bi->down  = strdup(down);
+    if (left)  bi->left  = strdup(left);
+    if (right) bi->right = strdup(right);
+  } /*pgc_set_button_geom*/
+
 struct pgcgroup *pgcgroup_new(vtypes type)
   {
     struct pgcgroup *ps=malloc(sizeof(struct pgcgroup));

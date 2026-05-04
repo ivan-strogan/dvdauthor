@@ -57,6 +57,9 @@ extern bool delete_output_dir;
 struct pgc *pgc_new();
 void pgc_free(struct pgc *p);
 int pgc_add_button(struct pgc *p,const char *name,const char *cmd);
+void pgc_set_button_geom(struct pgc *p,
+    int x0, int y0, int x1, int y1,
+    const char *up, const char *down, const char *left, const char *right);
 void pgc_add_entry(struct pgc *p, vtypes vtype,const char *entry);
 void pgc_add_source(struct pgc *p,struct source *v);
 void pgc_set_pre(struct pgc *p,const char *cmd);

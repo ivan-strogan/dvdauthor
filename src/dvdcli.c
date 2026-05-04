@@ -1343,21 +1343,42 @@ static void cell_end()
     pauselen = 0;
   }
 
+/* button geometry state — reset in button_start, applied in button_end */
+static int button_x0, button_y0, button_x1, button_y1;
+static char *button_up_name, *button_down_name, *button_left_name, *button_right_name;
+static bool button_has_geom;
+
 static void button_start()
 {
     parser_acceptbody = true;
-    buttonname=0;
+    buttonname = 0;
+    button_x0 = button_y0 = button_x1 = button_y1 = 0;
+    button_has_geom = false;
+    button_up_name = button_down_name = button_left_name = button_right_name = 0;
 }
 
 static void button_name(const char *f)
 {
-    buttonname=strdup(f);
+    buttonname = strdup(f);
 }
+
+static void button_x0_attr(const char *f) { button_x0 = atoi(f); button_has_geom = true; }
+static void button_y0_attr(const char *f) { button_y0 = atoi(f); }
+static void button_x1_attr(const char *f) { button_x1 = atoi(f); }
+static void button_y1_attr(const char *f) { button_y1 = atoi(f); }
+static void button_up_attr(const char *f)    { button_up_name    = strdup(f); }
+static void button_down_attr(const char *f)  { button_down_name  = strdup(f); }
+static void button_left_attr(const char *f)  { button_left_name  = strdup(f); }
+static void button_right_attr(const char *f) { button_right_name = strdup(f); }
 
 static void button_end()
 {
-    pgc_add_button(curpgc,buttonname,parser_body);
-    if(buttonname) free((char *)buttonname);
+    pgc_add_button(curpgc, buttonname, parser_body);
+    if (button_has_geom)
+        pgc_set_button_geom(curpgc,
+            button_x0, button_y0, button_x1, button_y1,
+            button_up_name, button_down_name, button_left_name, button_right_name);
+    if (buttonname) free((char *)buttonname);
 }
 
 static struct elemdesc elems[]={
@@ -1401,6 +1422,14 @@ static struct elemattr attrs[]={
     {"cell","pause",cell_pauselen},
 
     {"button","name",button_name},
+    {"button","x0",button_x0_attr},
+    {"button","y0",button_y0_attr},
+    {"button","x1",button_x1_attr},
+    {"button","y1",button_y1_attr},
+    {"button","up",button_up_attr},
+    {"button","down",button_down_attr},
+    {"button","left",button_left_attr},
+    {"button","right",button_right_attr},
 
     {"video","format",video_format},
     {"video","aspect",video_aspect},
