@@ -192,6 +192,10 @@ static int genpgc(unsigned char *buf,const struct workset *ws,const struct pgcgr
         if (e)
             buf[28 + i * 4] |= 0x80; /* set stream-available flag */
       } /*for*/
+    /* PGC navigation pointers (IFO byte offsets 156-161) */
+    write2(buf + 156, thispgc->next_pgc_nr);
+    write2(buf + 158, thispgc->prev_pgc_nr);
+    write2(buf + 160, thispgc->goup_pgc_nr);
     buf[163] = thispgc->pauselen; // PGC stilltime
     for (i = 0; i < 16; i++) /* colour lookup table (0, Y, Cr, Cb) */
         write4

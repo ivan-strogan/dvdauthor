@@ -1629,6 +1629,10 @@ void pgc_set_stilltime(struct pgc *p,int still)
     p->pauselen=still;
 }
 
+void pgc_set_goup_pgc_nr(struct pgc *p, int n) { p->goup_pgc_nr = (uint16_t)n; }
+void pgc_set_next_pgc_nr(struct pgc *p, int n) { p->next_pgc_nr = (uint16_t)n; }
+void pgc_set_prev_pgc_nr(struct pgc *p, int n) { p->prev_pgc_nr = (uint16_t)n; }
+
 int pgc_set_subpic_stream(struct pgc *p,int ch,const char *m,int id)
   /* adds a mapping for the subpicture stream numbered ch (in order of appearance) with
     mode name m to the substream with ID id. */

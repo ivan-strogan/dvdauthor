@@ -185,6 +185,7 @@ struct pgc { /* describes a program chain corresponding to a <pgc> directive */
     unsigned char subpmap[32][4];
       /* per-PGC explicit mapping of subpicture streams to alternative display modes for same
         <subpicture> track. Each entry is (128 | id) if present; 127 if not present. */
+    uint16_t next_pgc_nr, prev_pgc_nr, goup_pgc_nr; /* IFO PGC navigation pointers */
 };
 
 struct pgcgroup { /* common info across a set of menus or a set of titles (<menus> and <titles> directives) */

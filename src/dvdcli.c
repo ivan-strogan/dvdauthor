@@ -695,6 +695,7 @@ enum {
     DA_PGC,
     DA_VOB,
     DA_SUBP,
+    DA_TITLEMAP, /* dvdunauthor <titlemap> — accepted and ignored */
     DA_NOSUB
 };
 
@@ -1027,6 +1028,14 @@ static void audio_start()
       } /*if*/
   }
 
+/* No-op attribute callback — accepts and ignores dvdunauthor-specific attributes */
+static void noop_attr(const char *c) { (void)c; }
+/* dvdunauthor attributes on <audio> and <subpicture> not yet supported — accepted silently */
+static void audio_present_attr(const char *c) { (void)c; }
+static void audio_id_attr(const char *c) { (void)c; }
+static void subattr_present(const char *c) { (void)c; }
+static void subattr_id(const char *c) { (void)c; }
+
 static void audio_format(const char *c)
   {
     set_audio_attr(AUDIO_FORMAT, c, setaudio);
@@ -1178,6 +1187,11 @@ static void pgc_start()
     setsubpicture = -1;
     subpmode = DA_PGC;
 }
+
+/* dvdunauthor PGC navigation attributes (up=goup, next, prev) */
+static void pgc_up_attr(const char *c)   { pgc_set_goup_pgc_nr(curpgc, atoi(c)); }
+static void pgc_next_attr(const char *c) { pgc_set_next_pgc_nr(curpgc, atoi(c)); }
+static void pgc_prev_attr(const char *c) { pgc_set_prev_pgc_nr(curpgc, atoi(c)); }
 
 static void pgc_entry(const char *e)
 {
@@ -1382,23 +1396,27 @@ static void button_end()
 }
 
 static struct elemdesc elems[]={
-    {"dvdauthor", DA_BEGIN,   DA_ROOT,    dvdauthor_start, dvdauthor_end},
-    {"titleset",  DA_ROOT,    DA_SET,     titleset_start,  titleset_end},
-    {"vmgm",      DA_ROOT,    DA_SET,     vmgm_start,      vmgm_end},
-    {"fpc",       DA_SET,     DA_NOSUB,   fpc_start,       fpc_end},
-    {"titles",    DA_SET,     DA_PGCGROUP,titles_start,    0},
-    {"menus",     DA_SET,     DA_PGCGROUP,menus_start,     menus_end},
-    {"video",     DA_PGCGROUP,DA_NOSUB,   video_start,     0},
-    {"audio",     DA_PGCGROUP,DA_NOSUB,   audio_start,     0},
-    {"subpicture",DA_PGCGROUP,DA_SUBP,    subattr_group_start, 0},
-    {"pgc",       DA_PGCGROUP,DA_PGC,     pgc_start,       pgc_end},
-    {"pre",       DA_PGC,     DA_NOSUB,   pre_start,       pre_end},
-    {"post",      DA_PGC,     DA_NOSUB,   post_start,      post_end},
-    {"button",    DA_PGC,     DA_NOSUB,   button_start,    button_end},
-    {"vob",       DA_PGC,     DA_VOB,     vob_start,       vob_end},
-    {"subpicture",DA_PGC,     DA_SUBP,    subattr_pgc_start, 0},
-    {"cell",      DA_VOB,     DA_NOSUB,   cell_start,      cell_end},
-    {"stream",    DA_SUBP,    DA_NOSUB,   stream_start,    stream_end},
+    {"dvdauthor", DA_BEGIN,   DA_ROOT,      dvdauthor_start,      dvdauthor_end},
+    {"titleset",  DA_ROOT,    DA_SET,       titleset_start,       titleset_end},
+    {"vmgm",      DA_ROOT,    DA_SET,       vmgm_start,           vmgm_end},
+    {"fpc",       DA_SET,     DA_NOSUB,     fpc_start,            fpc_end},
+    {"titles",    DA_SET,     DA_PGCGROUP,  titles_start,         0},
+    {"menus",     DA_SET,     DA_PGCGROUP,  menus_start,          menus_end},
+    /* dvdunauthor <titlemap titleset="N" title="N"/> — accepted and ignored */
+    {"titlemap",  DA_SET,     DA_NOSUB,     0,                    0},
+    {"video",     DA_PGCGROUP,DA_NOSUB,     video_start,          0},
+    {"audio",     DA_PGCGROUP,DA_NOSUB,     audio_start,          0},
+    {"subpicture",DA_PGCGROUP,DA_SUBP,      subattr_group_start,  0},
+    {"pgc",       DA_PGCGROUP,DA_PGC,       pgc_start,            pgc_end},
+    {"pre",       DA_PGC,     DA_NOSUB,     pre_start,            pre_end},
+    {"post",      DA_PGC,     DA_NOSUB,     post_start,           post_end},
+    {"button",    DA_PGC,     DA_NOSUB,     button_start,         button_end},
+    {"vob",       DA_PGC,     DA_VOB,       vob_start,            vob_end},
+    {"subpicture",DA_PGC,     DA_SUBP,      subattr_pgc_start,    0},
+    /* dvdunauthor per-PGC <audio> and <subpicture> stream hints — accepted, ignored */
+    {"audio",     DA_PGC,     DA_NOSUB,     0,                    0},
+    {"cell",      DA_VOB,     DA_NOSUB,     cell_start,           cell_end},
+    {"stream",    DA_SUBP,    DA_NOSUB,     stream_start,         stream_end},
     {0,0,0,0,0}
 };
 
@@ -1408,6 +1426,10 @@ static struct elemattr attrs[]={
     {"dvdauthor","allgprm",dvdauthor_allgprm},
     {"dvdauthor","format",dvdauthor_video_format},
     {"dvdauthor","provider",dvdauthor_provider},
+
+    /* dvdunauthor <titlemap titleset="N" title="N"/> — accepted and ignored */
+    {"titlemap","titleset",noop_attr},
+    {"titlemap","title",noop_attr},
 
     {"menus","lang",menus_lang},
 
@@ -1444,15 +1466,25 @@ static struct elemattr attrs[]={
     {"audio","channels",audio_channels},
     {"audio","samplerate",audio_samplerate},
     {"audio","content",audio_content},
+    /* dvdunauthor extensions — accepted silently */
+    {"audio","present",audio_present_attr},
+    {"audio","id",audio_id_attr},
 
     {"subpicture","lang",subattr_lang},
     {"subpicture","content",subattr_content},
+    /* dvdunauthor extensions — accepted silently */
+    {"subpicture","present",subattr_present},
+    {"subpicture","id",subattr_id},
     {"stream","mode",substream_mode},
     {"stream","id",substream_id},
 
     {"pgc","entry",pgc_entry},
     {"pgc","palette",pgc_palette},
     {"pgc","pause",pgc_pause},
+    /* dvdunauthor PGC navigation attributes */
+    {"pgc","up",pgc_up_attr},
+    {"pgc","next",pgc_next_attr},
+    {"pgc","prev",pgc_prev_attr},
     {0,0,0}
 };
 

@@ -77,16 +77,15 @@ static bool compile_usesreg(const struct vm_statement *cs, int target)
 
 static int nexttarget(int t)
   /* returns the next register after t in the range I have reserved. Will fail
-    if it's all used, or if I haven't got a reserved range. */
+    if it's all used, or if I haven't got a reserved range.
+    In allgprm mode g13-15 are user-accessible but we still use them as
+    temporaries (they are cleared after use at line ~201). */
   {
-    if (!allowallreg)
-      {
-        if (t < 13)
-            return 13;
-        t++;
-        if (t < 16)
-            return t;
-      } /*if*/
+    if (t < 13)
+        return 13;
+    t++;
+    if (t < 16)
+        return t;
     fprintf(stderr,"ERR:  Expression is too complicated, ran out of registers\n");
     exit(1);
   } /*nexttarget*/
