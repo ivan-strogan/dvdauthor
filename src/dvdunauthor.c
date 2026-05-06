@@ -1080,7 +1080,7 @@ static void getVobs(dvd_reader_t *dvd, const ifo_handle_t *ifo, int titleset, in
     time_t start,now;
 
     cptr = titlef ? ifo->vts_c_adt : ifo->menu_c_adt;
-    if (cptr)
+    if (cptr && cptr->last_byte + 1 > C_ADT_SIZE)
       {
         cells = cptr->cell_adr_table;
         numcells = (cptr->last_byte + 1 - C_ADT_SIZE) / sizeof(cell_adr_t);
