@@ -1134,7 +1134,8 @@ static void getVobs(dvd_reader_t *dvd, const ifo_handle_t *ifo, int titleset, in
                 for (j = 0; j < ifo->pgci_ut->nr_of_lus; j++)
                   {
                     const pgci_lu_t * const lu = &ifo->pgci_ut->lu[j];
-                    findpalette(cells[i].vob_id, lu->pgcit, &palette, &plen);
+                    if (lu->pgcit)
+                        findpalette(cells[i].vob_id, lu->pgcit, &palette, &plen);
                   } /*for*/
               } /*if*/
           } /*if*/
@@ -1395,7 +1396,8 @@ static void dump_dvd
                 addLangAttr(menusNode, lu->lang_code);
                 get_attr(ifo, titleset == 0 ? -1 : 0, &ab);
                 dump_attr(&ab, menusNode);
-                dump_pgcs(ifo, lu->pgcit, &ab, titleset, titlef, menusNode);
+                if (lu->pgcit)
+                    dump_pgcs(ifo, lu->pgcit, &ab, titleset, titlef, menusNode);
               } /*for*/
           } /*if*/
       } /*if*/
