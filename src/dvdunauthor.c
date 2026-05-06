@@ -1084,7 +1084,8 @@ static void getVobs(dvd_reader_t *dvd, const ifo_handle_t *ifo, int titleset, in
     cptr = titlef ? ifo->vts_c_adt : ifo->menu_c_adt;
     if (cptr
         && cptr->last_byte + 1 > C_ADT_SIZE
-        && cptr->last_byte < 0x100000 /* sanity: C_ADT cannot exceed 1 MB */)
+        && cptr->last_byte < 0x100000 /* sanity: C_ADT cannot exceed 1 MB */
+        && (uintptr_t)cptr->cell_adr_table > 0xffff)
       {
         cells = cptr->cell_adr_table;
         numcells = (cptr->last_byte + 1 - C_ADT_SIZE) / sizeof(cell_adr_t);
@@ -1134,7 +1135,7 @@ static void getVobs(dvd_reader_t *dvd, const ifo_handle_t *ifo, int titleset, in
                 for (j = 0; j < ifo->pgci_ut->nr_of_lus; j++)
                   {
                     const pgci_lu_t * const lu = &ifo->pgci_ut->lu[j];
-                    if (lu->pgcit)
+                    if ((uintptr_t)lu->pgcit > 0xffff)
                         findpalette(cells[i].vob_id, lu->pgcit, &palette, &plen);
                   } /*for*/
               } /*if*/
@@ -1396,7 +1397,7 @@ static void dump_dvd
                 addLangAttr(menusNode, lu->lang_code);
                 get_attr(ifo, titleset == 0 ? -1 : 0, &ab);
                 dump_attr(&ab, menusNode);
-                if (lu->pgcit)
+                if ((uintptr_t)lu->pgcit > 0xffff)
                     dump_pgcs(ifo, lu->pgcit, &ab, titleset, titlef, menusNode);
               } /*for*/
           } /*if*/
