@@ -403,7 +403,8 @@ static void dump_attr
                 (const xmlChar *)"format",
                 (const xmlChar *)audio_format[ab->audio_attr[i].audio_format]
               );
-        if (audio_type[ab->audio_attr[i].code_extension])
+        if (ab->audio_attr[i].code_extension < 5
+            && audio_type[ab->audio_attr[i].code_extension])
             xmlNewProp
               (
                 newNode,
@@ -415,7 +416,8 @@ static void dump_attr
       {
         newNode = NewChildTag(node, "subpicture");
         addLangAttr(newNode, ab->subp_attr[i].lang_code);
-        if (subp_type[ab->subp_attr[i].code_extension])
+        if (ab->subp_attr[i].code_extension < 16
+            && subp_type[ab->subp_attr[i].code_extension])
             xmlNewProp
               (
                 newNode,
