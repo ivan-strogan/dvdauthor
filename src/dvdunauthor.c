@@ -403,8 +403,7 @@ static void dump_attr
                 (const xmlChar *)"format",
                 (const xmlChar *)audio_format[ab->audio_attr[i].audio_format]
               );
-        if (ab->audio_attr[i].code_extension < 5
-            && audio_type[ab->audio_attr[i].code_extension])
+        if (audio_type[ab->audio_attr[i].code_extension])
             xmlNewProp
               (
                 newNode,
@@ -416,8 +415,7 @@ static void dump_attr
       {
         newNode = NewChildTag(node, "subpicture");
         addLangAttr(newNode, ab->subp_attr[i].lang_code);
-        if (ab->subp_attr[i].code_extension < 16
-            && subp_type[ab->subp_attr[i].code_extension])
+        if (subp_type[ab->subp_attr[i].code_extension])
             xmlNewProp
               (
                 newNode,
@@ -1082,10 +1080,7 @@ static void getVobs(dvd_reader_t *dvd, const ifo_handle_t *ifo, int titleset, in
     time_t start,now;
 
     cptr = titlef ? ifo->vts_c_adt : ifo->menu_c_adt;
-    if (cptr
-        && cptr->last_byte + 1 > C_ADT_SIZE
-        && cptr->last_byte < 0x100000 /* sanity: C_ADT cannot exceed 1 MB */
-        && (uintptr_t)cptr->cell_adr_table > 0xffff)
+    if (cptr)
       {
         cells = cptr->cell_adr_table;
         numcells = (cptr->last_byte + 1 - C_ADT_SIZE) / sizeof(cell_adr_t);
@@ -1135,8 +1130,7 @@ static void getVobs(dvd_reader_t *dvd, const ifo_handle_t *ifo, int titleset, in
                 for (j = 0; j < ifo->pgci_ut->nr_of_lus; j++)
                   {
                     const pgci_lu_t * const lu = &ifo->pgci_ut->lu[j];
-                    if ((uintptr_t)lu->pgcit > 0xffff)
-                        findpalette(cells[i].vob_id, lu->pgcit, &palette, &plen);
+                    findpalette(cells[i].vob_id, lu->pgcit, &palette, &plen);
                   } /*for*/
               } /*if*/
           } /*if*/
@@ -1397,8 +1391,7 @@ static void dump_dvd
                 addLangAttr(menusNode, lu->lang_code);
                 get_attr(ifo, titleset == 0 ? -1 : 0, &ab);
                 dump_attr(&ab, menusNode);
-                if ((uintptr_t)lu->pgcit > 0xffff)
-                    dump_pgcs(ifo, lu->pgcit, &ab, titleset, titlef, menusNode);
+                dump_pgcs(ifo, lu->pgcit, &ab, titleset, titlef, menusNode);
               } /*for*/
           } /*if*/
       } /*if*/
