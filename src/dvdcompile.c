@@ -540,6 +540,12 @@ static unsigned char *compilecs
             while (true) /* should loop no more than twice */
               {
                 unsigned char *lp, *ib, *e;
+                const int saved_numgotos = numgotos;
+                const int saved_numlabels = numlabels;
+                  /* save before trial compilation so stale entries can be discarded
+                     if this iteration doesn't produce a fitting layout -- without this,
+                     goto/label entries from overwritten trial code get fixed up later
+                     against the wrong instruction positions */
                 lp = compilecs(obuf, iftrue, ws, curgroup, curpgc, cs->param->next->param, ismenu);
                   /* the if-true part */
                 if (cs->param->next->next)
@@ -562,6 +568,8 @@ static unsigned char *compilecs
                 if (ib == iftrue && lp == iffalse)
                     break; /* all fitted nicely */
               /* didn't leave enough room for pieces next to each other, try again */
+                numgotos = saved_numgotos;   /* discard stale goto entries from this trial */
+                numlabels = saved_numlabels; /* discard stale label entries from this trial */
                 iftrue = ib; /* enough room for condition code */
                 iffalse = lp; /* enough room for true branch */
                 end = e;
